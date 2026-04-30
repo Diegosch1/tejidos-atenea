@@ -1,66 +1,34 @@
-// client/src/services/authService.js
 import api from './api';
+
+const KEY = 'ta_user';
 
 const authService = {
   register: async (email, password, nombre, apellido = '') => {
-    try {
-      const response = await api.post('/auth/register', {
-        email,
-        password,
-        nombre,
-        apellido
-      });
-      return response.data;
-    } catch (error) {
-      throw error.response?.data || { error: 'Error en el registro' };
-    }
+    const { data } = await api.post('/auth/register', { email, password, nombre, apellido });
+    localStorage.setItem(KEY, JSON.stringify(data.user));
+    return data;
   },
 
   login: async (email, password) => {
+    const { data } = await api.post('/auth/login', { email, password });
+    localStorage.setItem(KEY, JSON.stringify(data.user));
+    return data;
+  },
+
+  logout: async () => {
+    try { await api.post('/auth/logout'); } catch (_) {}
+    localStorage.removeItem(KEY);
+  },
+
+  getMe: async () => {
     try {
-      const response = await api.post('/auth/login', {
-        email,
-        password
-      });
-      return response.data;
-    } catch (error) {
-      throw error.response?.data || { error: 'Error al iniciar sesión' };
-    }
+      const { data } = await api.get('/auth/me');
+      return data.user;
+    } catch (_) { return null; }
   },
 
-  logout: () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-  },
-
-  getProfile: async () => {
-    try {
-      const response = await api.get('/auth/profile');
-      return response.data;
-    } catch (error) {
-      throw error.response?.data || { error: 'Error al obtener perfil' };
-    }
-  },
-
-  setToken: (token) => {
-    localStorage.setItem('token', token);
-  },
-
-  getToken: () => {
-    return localStorage.getItem('token');
-  },
-
-  setUser: (user) => {
-    localStorage.setItem('user', JSON.stringify(user));
-  },
-
-  getUser: () => {
-    const user = localStorage.getItem('user');
-    return user ? JSON.parse(user) : null;
-  },
-
-  isAuthenticated: () => {
-    return !!localStorage.getItem('token');
+  getLocal: () => {
+    try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; }
   }
 };
 

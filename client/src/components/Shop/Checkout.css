@@ -1,0 +1,46 @@
+/* client/src/components/Shop/Checkout.css */
+.checkout-summary {
+  background: var(--cream); border-radius: var(--r-md);
+  padding: 16px; margin-bottom: 20px;
+  border: 1px solid var(--border);
+}
+.checkout-summary h4 {
+  font-size: .78rem; text-transform: uppercase; letter-spacing: .07em;
+  color: var(--ink-soft); font-weight: 700; margin-bottom: 12px;
+}
+.checkout-item {
+  display: flex; justify-content: space-between;
+  font-size: .88rem; color: var(--ink-mid);
+  padding: 4px 0;
+}
+.checkout-total {
+  display: flex; justify-content: space-between;
+  margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 1rem; color: var(--ink);
+}
+
+.checkout-section-title {
+  font-size: .78rem; text-transform: uppercase; letter-spacing: .07em;
+  color: var(--ink-soft); font-weight: 700; margin-bottom: 10px;
+}
+
+.metodo-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.metodo-option {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; border-radius: var(--r-md);
+  border: 1.5px solid var(--border);
+  cursor: pointer; transition: all .15s; font-size: .9rem;
+  background: var(--surface);
+}
+.metodo-option input { display: none; }
+.metodo-option:hover { border-color: var(--primary-mid); }
+.metodo-option.selected { border-color: var(--primary); background: var(--primary-lt); color: var(--primary); }
+
+.checkout-success {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; gap: 14px; padding: 12px 0 8px;
+}
+.success-icon { color: var(--success); }
+.checkout-success h3 { font-size: 1.3rem; }
+.checkout-success p  { color: var(--ink-soft); max-width: 300px; }

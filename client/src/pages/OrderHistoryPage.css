@@ -1,0 +1,45 @@
+/* client/src/pages/OrderHistoryPage.css */
+.orders-header {
+  background: linear-gradient(160deg, var(--cream-dark) 0%, var(--primary-lt) 100%);
+  padding: 48px 0 40px; border-bottom: 1px solid var(--border);
+}
+.orders-header h1 {
+  display: flex; align-items: center; gap: 12px;
+  font-size: clamp(1.6rem, 3.5vw, 2.2rem); margin-bottom: 6px;
+}
+.orders-header p { color: var(--ink-mid); }
+.orders-body     { padding: 36px 0 60px; }
+.orders-list     { display: flex; flex-direction: column; gap: 16px; max-width: 860px; }
+
+.order-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.order-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 22px; cursor: pointer; gap: 12px; flex-wrap: wrap;
+  transition: background .15s;
+}
+.order-card-header:hover { background: var(--cream); }
+
+.order-meta       { display: flex; flex-direction: column; gap: 3px; }
+.order-number     { font-weight: 700; font-size: .95rem; color: var(--ink); }
+.order-date       { font-size: .78rem; color: var(--ink-soft); }
+.order-meta-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.order-total      { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; color: var(--primary); }
+
+.order-detail { padding: 0 22px 20px; border-top: 1px solid var(--border); }
+.order-info-row { padding: 14px 0 10px; font-size: .88rem; color: var(--ink-mid); }
+
+.order-items-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+.order-items-table th {
+  text-align: left; padding: 8px 10px;
+  background: var(--cream); border-bottom: 1px solid var(--border);
+  font-size: .72rem; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--ink-soft);
+}
+.order-items-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); color: var(--ink-mid); }
+.order-items-table tr:last-child td { border-bottom: none; }
+
+.order-actions { margin-top: 16px; }

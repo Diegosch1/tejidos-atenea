@@ -1,83 +1,48 @@
-// client/src/context/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import authService from '../services/authService';
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser]       = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Verificar si hay usuario en localStorage al cargar la app
   useEffect(() => {
-    const checkAuth = async () => {
-      const localUser = authService.getLocalUser();
-      
-      if (localUser) {
-        // Verificar si el token sigue siendo válido
-        try {
-          const currentUser = await authService.getCurrentUser();
-          if (currentUser) {
-            setUser(currentUser);
-          } else {
-            // Token expirado o inválido
-            localStorage.removeItem('user');
-            setUser(null);
-          }
-        } catch (err) {
-          localStorage.removeItem('user');
-          setUser(null);
-        }
+    const init = async () => {
+      if (authService.getLocal()) {
+        const me = await authService.getMe();
+        setUser(me);
+        if (me) localStorage.setItem('ta_user', JSON.stringify(me));
+        else     localStorage.removeItem('ta_user');
       }
-      
       setLoading(false);
     };
-
-    checkAuth();
+    init();
   }, []);
 
-  const register = async (email, password, nombre, apellido) => {
-    try {
-      const response = await authService.register(email, password, nombre, apellido);
-      setUser(response.user);
-      return response;
-    } catch (error) {
-      throw error;
-    }
+  const login = async (email, password) => {
+    const res = await authService.login(email, password);
+    setUser(res.user);
+    return res;
   };
 
-  const login = async (email, password) => {
-    try {
-      const response = await authService.login(email, password);
-      setUser(response.user);
-      return response;
-    } catch (error) {
-      throw error;
-    }
+  const register = async (email, password, nombre, apellido) => {
+    const res = await authService.register(email, password, nombre, apellido);
+    setUser(res.user);
+    return res;
   };
 
   const logout = async () => {
-    try {
-      await authService.logout();
-      setUser(null);
-    } catch (error) {
-      setUser(null);
-      throw error;
-    }
+    await authService.logout();
+    setUser(null);
   };
-
-  const isAdmin = user?.role === 'admin';
-  const isAuthenticated = !!user;
 
   return (
     <AuthContext.Provider value={{
-      user,
-      loading,
-      register,
-      login,
-      logout,
-      isAuthenticated,
-      isAdmin
+      user, loading,
+      login, register, logout,
+      isAuthenticated: !!user,
+      isAdmin: user?.role === 'admin',
     }}>
       {children}
     </AuthContext.Provider>
@@ -85,9 +50,7 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth debe usarse dentro de AuthProvider');
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be inside AuthProvider');
+  return ctx;
 };

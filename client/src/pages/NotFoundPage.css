@@ -1,0 +1,15 @@
+/* client/src/pages/NotFoundPage.css */
+.not-found {
+  min-height: calc(100vh - 68px);
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, var(--cream) 0%, var(--primary-lt) 100%);
+}
+.nf-content {
+  text-align: center; animation: slideUp .4s ease;
+}
+.nf-emoji img { height: 200px; margin-left: 65px;}
+.nf-emoji  { display: block; margin-bottom: 16px; animation: float 4s ease-in-out infinite; }
+.nf-content h1 { font-size: 6rem; line-height: 1; color: var(--primary-mid); font-family: var(--font-display); margin-bottom: 0; }
+.nf-content h2 { font-size: 1.8rem; margin-bottom: 12px; }
+.nf-content p  { color: var(--ink-soft); margin-bottom: 32px; }
+.nf-actions    { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }

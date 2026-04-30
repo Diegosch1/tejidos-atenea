@@ -1,0 +1,27 @@
+/* client/src/components/Common/Toast.css */
+.toast-stack {
+  position: fixed; bottom: 24px; right: 24px;
+  display: flex; flex-direction: column; gap: 10px;
+  z-index: 9999; max-width: 340px;
+}
+.toast {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 16px; border-radius: var(--r-md);
+  font-size: .88rem; font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  animation: toastIn .25s ease;
+  min-width: 240px;
+}
+.toast-success { background: #fff; border-left: 4px solid var(--success); color: var(--ink); }
+.toast-success svg { color: var(--success); }
+.toast-error   { background: #fff; border-left: 4px solid var(--danger);  color: var(--ink); }
+.toast-error   svg { color: var(--danger); }
+.toast-info    { background: #fff; border-left: 4px solid var(--primary); color: var(--ink); }
+.toast-info    svg { color: var(--primary); }
+.toast span    { flex: 1; }
+.toast-close   {
+  background: none; border: none; cursor: pointer;
+  color: var(--ink-soft); padding: 2px; border-radius: 3px;
+  display: flex; align-items: center;
+}
+.toast-close:hover { color: var(--ink); }

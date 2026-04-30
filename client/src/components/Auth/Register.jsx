@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import logo from '../../assets/favicon_nobg.png';
 import './Auth.css';
 
 const Register = () => {
@@ -193,9 +194,8 @@ const Register = () => {
       </div>
 
       <div className="auth-decoration">
-        <div className="yarn-ball yarn-1">🧶</div>
-        <div className="yarn-ball yarn-2">🧶</div>
-        <div className="yarn-ball yarn-3">🧶</div>
+        <div className="yarn-ball yarn-1"><img src={logo} alt="Tejidos Atenea" /></div>
+        <div className="yarn-ball yarn-2"><img src={logo} alt="Tejidos Atenea" /></div>        
       </div>
     </div>
   );

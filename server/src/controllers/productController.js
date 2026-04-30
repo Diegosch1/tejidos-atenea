@@ -13,10 +13,18 @@ const deleteImageFile = (imagePath) => {
 // GET /api/products — listado público con filtros opcionales
 const getAll = async (req, res) => {
   try {
-    const { category_id, precio_min, precio_max, page = 1, limit = 12 } = req.query;
+    const { category_id, precio_min, precio_max, search, page = 1, limit = 12 } = req.query;
+    console.log(req.user?.role);
+    
 
     let where = [];
     let params = [];
+
+    const isAdmin = req.user?.role === 'admin';
+
+    if (!isAdmin) {
+      where.push('p.activo = TRUE');
+    }
 
     if (category_id) {
       where.push('p.category_id = ?');
@@ -30,6 +38,10 @@ const getAll = async (req, res) => {
       where.push('p.precio <= ?');
       params.push(Number(precio_max));
     }
+    if (search) {
+      where.push('(p.nombre LIKE ? OR p.descripcion LIKE ?)');
+      params.push(`%${search}%`, `%${search}%`);
+    }
 
     const whereClause = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
@@ -39,7 +51,7 @@ const getAll = async (req, res) => {
     const [rows] = await pool.query(
       `SELECT 
         p.id, p.nombre, p.descripcion, p.precio, p.stock,
-        p.imagen_path, p.created_at,
+        p.imagen_path, p.created_at, p.activo,
         c.id AS category_id, c.nombre AS categoria
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
@@ -53,7 +65,8 @@ const getAll = async (req, res) => {
       `SELECT COUNT(*) as total FROM products p ${whereClause}`,
       params
     );
-
+    console.log(rows);
+    
     res.json({
       products: rows,
       pagination: {
@@ -69,13 +82,85 @@ const getAll = async (req, res) => {
   }
 };
 
+// server/src/controllers/productController.js
+
+// GET /api/products/admin/all - para admin (ve TODOS los productos, activos e inactivos)
+const getAllAdmin = async (req, res) => {
+  try {
+    
+    const { category_id, precio_min, precio_max, search, page = 1, limit = 100 } = req.query;
+
+    let where = [];
+    let params = [];
+
+    // Admin NO aplica filtro de activo para ver todos
+
+    if (category_id) {
+      where.push('p.category_id = ?');
+      params.push(category_id);
+    }
+    if (precio_min) {
+      where.push('p.precio >= ?');
+      params.push(Number(precio_min));
+    }
+    if (precio_max) {
+      where.push('p.precio <= ?');
+      params.push(Number(precio_max));
+    }
+    if (search) {
+      where.push('(p.nombre LIKE ? OR p.descripcion LIKE ?)');
+      params.push(`%${search}%`, `%${search}%`);
+    }
+
+    const whereClause = where.length ? `WHERE ${where.join(' AND ')}` : '';
+    const offset = (Number(page) - 1) * Number(limit);
+
+    const [rows] = await pool.query(
+      `SELECT 
+        p.id, p.nombre, p.descripcion, p.precio, p.stock,
+        p.imagen_path, p.created_at, p.activo,
+        c.id AS category_id, c.nombre AS categoria
+       FROM products p
+       LEFT JOIN categories c ON p.category_id = c.id
+       ${whereClause}
+       ORDER BY p.created_at DESC
+       LIMIT ? OFFSET ?`,
+      [...params, Number(limit), offset]
+    );
+
+    const [[{ total }]] = await pool.query(
+      `SELECT COUNT(*) as total FROM products p ${whereClause}`,
+      params
+    );
+    
+    const activos = rows.filter(p => p.activo === 1).length;
+    const inactivos = rows.filter(p => p.activo === 0 || p.activo === false).length;
+    
+    console.log(`Total productos: ${rows.length} (Activos: ${activos}, Inactivos: ${inactivos})`);
+    console.log('Primer producto inactivo:', rows.find(p => p.activo === 0));
+    
+    res.json({
+      products: rows,
+      pagination: {
+        total,
+        page: Number(page),
+        limit: Number(limit),
+        totalPages: Math.ceil(total / Number(limit))
+      }
+    });
+  } catch (err) {
+    console.error('Error getAllAdmin products:', err);
+    res.status(500).json({ error: 'Error al obtener productos para admin' });
+  }
+};
+
 // GET /api/products/:id — detalle
 const getById = async (req, res) => {
   try {
     const [rows] = await pool.query(
       `SELECT 
         p.id, p.nombre, p.descripcion, p.precio, p.stock,
-        p.imagen_path, p.created_at,
+        p.imagen_path, p.created_at, p.activo,
         c.id AS category_id, c.nombre AS categoria
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
@@ -216,15 +301,48 @@ const remove = async (req, res) => {
     const [existing] = await pool.query('SELECT * FROM products WHERE id = ?', [id]);
     if (existing.length === 0) return res.status(404).json({ error: 'Producto no encontrado' });
 
-    // Eliminar imagen del disco
-    if (existing[0].imagen_path) deleteImageFile(existing[0].imagen_path);
-
-    await pool.query('DELETE FROM products WHERE id = ?', [id]);
-    res.json({ message: 'Producto eliminado correctamente' });
+    await pool.query('UPDATE products SET activo = FALSE WHERE id = ?', [id]);
+    res.json({ message: 'Producto desactivado correctamente' });
   } catch (err) {
     console.error('Error remove product:', err);
     res.status(500).json({ error: 'Error al eliminar producto' });
   }
 };
 
-module.exports = { getAll, getById, create, update, remove };
+const reactivate = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Verificar que el producto existe
+    const [existing] = await pool.query('SELECT * FROM products WHERE id = ?', [id]);
+    if (existing.length === 0) {
+      return res.status(404).json({ error: 'Producto no encontrado' });
+    }
+
+    // Verificar que el producto esté inactivo
+    if (existing[0].activo === true) {
+      return res.status(400).json({ error: 'El producto ya está activo' });
+    }
+
+    // Reactivar el producto
+    await pool.query('UPDATE products SET activo = TRUE WHERE id = ?', [id]);
+    
+    // Obtener el producto actualizado
+    const [updated] = await pool.query(
+      `SELECT p.*, c.nombre AS categoria
+       FROM products p LEFT JOIN categories c ON p.category_id = c.id
+       WHERE p.id = ?`,
+      [id]
+    );
+
+    res.json({ 
+      message: 'Producto reactivado correctamente',
+      product: updated[0]
+    });
+  } catch (err) {
+    console.error('Error reactivate product:', err);
+    res.status(500).json({ error: 'Error al reactivar producto' });
+  }
+};
+
+module.exports = { getAll, getAllAdmin, getById, create, update, remove, reactivate };

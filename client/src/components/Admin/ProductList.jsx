@@ -54,9 +54,6 @@ export default function ProductList() {
 
   const activeProducts   = products.filter(p => p.activo)
   const inactiveProducts = products.filter(p => !p.activo)  
-  
-  console.log('Products:', products);
-  
 
   return (
     <div className="product-list-panel">

@@ -14,8 +14,6 @@ const deleteImageFile = (imagePath) => {
 const getAll = async (req, res) => {
   try {
     const { category_id, precio_min, precio_max, search, page = 1, limit = 12 } = req.query;
-    console.log(req.user?.role);
-    
 
     let where = [];
     let params = [];
@@ -65,8 +63,7 @@ const getAll = async (req, res) => {
       `SELECT COUNT(*) as total FROM products p ${whereClause}`,
       params
     );
-    console.log(rows);
-    
+   
     res.json({
       products: rows,
       pagination: {
@@ -135,10 +132,7 @@ const getAllAdmin = async (req, res) => {
     
     const activos = rows.filter(p => p.activo === 1).length;
     const inactivos = rows.filter(p => p.activo === 0 || p.activo === false).length;
-    
-    console.log(`Total productos: ${rows.length} (Activos: ${activos}, Inactivos: ${inactivos})`);
-    console.log('Primer producto inactivo:', rows.find(p => p.activo === 0));
-    
+
     res.json({
       products: rows,
       pagination: {

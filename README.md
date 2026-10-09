@@ -282,4 +282,4 @@ Respuesta:
 
 # 👨‍💻 Autor
 
-Proyecto desarrollado por Kory Bonilla.
+Proyecto desarrollado por Diego Rodríguez para Kory Bonilla.
